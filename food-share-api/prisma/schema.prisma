@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Donor {
+  id          String   @id @default(uuid())
+  name        String
+  cnpj        String   @unique
+  email       String   @unique
+  responsible String
+  password    String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  latitude    Float
+  longitude   Float
+  local       String
+  foods       Food[]
+}
+
+model Food {
+  id              String   @id @default(uuid())
+  name            String
+  expiration_time DateTime
+  quantity        Int
+  donor_id        String
+  donor           Donor    @relation(fields: [donor_id], references: [id])
+}
+
+model Vulnerable {
+  id       String @id @default(uuid())
+  email    String @unique
+  password String
+  cpf      String @unique
+}
+
+model Token {
+  id    String  @id @default(uuid())
+  token String
+  used  Boolean @default(false)
+}

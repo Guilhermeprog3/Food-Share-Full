@@ -1,0 +1,700 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "FoodShare API",
+    "description": "API para sistema de doação de alimentos",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3333/api",
+      "description": "API local"
+    }
+  ],
+  "paths": {
+    "/sessao": {
+      "post": {
+        "summary": "Autenticar usuário",
+        "tags": ["Autenticação"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "email": "empresa@email.com",
+                "password": "123456"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Autenticação realizada com sucesso",
+            "content": {
+              "application/json": {
+                "example": {
+                  "user": {
+                    "id": "123e4567-e89b-12d3-a456-426614174000",
+                    "name": "Restaurante Bom Prato",
+                    "email": "empresa@email.com"
+                  },
+                  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                  "type": "donor"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/token": {
+      "post": {
+        "summary": "Validar token",
+        "tags": ["Autenticação"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token validado com sucesso",
+            "content": {
+              "application/json": {
+                "example": {
+                  "valid": true,
+                  "decoded": {
+                    "sub": "123e4567-e89b-12d3-a456-426614174000",
+                    "type": "donor"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/doadores": {
+      "post": {
+        "summary": "Criar novo doador",
+        "tags": ["Doadores"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "cnpj": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "responsible": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "latitude": {
+                    "type": "number"
+                  },
+                  "longitude": {
+                    "type": "number"
+                  },
+                  "local": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "name": "Restaurante Bom Prato",
+                "cnpj": "12.345.678/0001-90",
+                "email": "empresa@email.com",
+                "responsible": "João Silva",
+                "password": "123456",
+                "latitude": -23.5505,
+                "longitude": -46.6333,
+                "local": "Rua das Flores, 123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Doador criado com sucesso",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": "123e4567-e89b-12d3-a456-426614174000",
+                  "name": "Restaurante Bom Prato",
+                  "cnpj": "12.345.678/0001-90",
+                  "email": "empresa@email.com",
+                  "responsible": "João Silva",
+                  "latitude": -23.5505,
+                  "longitude": -46.6333,
+                  "local": "Rua das Flores, 123",
+                  "created_at": "2024-02-19T17:22:33.382Z",
+                  "updated_at": "2024-02-19T17:22:33.382Z"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Listar doadores",
+        "tags": ["Doadores"],
+        "responses": {
+          "200": {
+            "description": "Lista de doadores",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": "123e4567-e89b-12d3-a456-426614174000",
+                    "name": "Restaurante Bom Prato",
+                    "cnpj": "12.345.678/0001-90",
+                    "email": "empresa@email.com",
+                    "responsible": "João Silva",
+                    "latitude": -23.5505,
+                    "longitude": -46.6333,
+                    "local": "Rua das Flores, 123"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alimentos": {
+      "post": {
+        "summary": "Criar novo alimento",
+        "tags": ["Alimentos"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nome do alimento"
+                  },
+                  "expiration_time": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Data de validade"
+                  },
+                  "quantity": {
+                    "type": "number",
+                    "description": "Quantidade disponível"
+                  }
+                },
+                "required": ["name", "expiration_time", "quantity"]
+              },
+              "example": {
+                "name": "Arroz",
+                "expiration_time": "2024-12-31T23:59:59Z",
+                "quantity": 10
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Alimento cadastrado com sucesso",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": "123e4567-e89b-12d3-a456-426614174000",
+                  "name": "Arroz",
+                  "expiration_time": "2024-12-31T23:59:59Z",
+                  "quantity": 10,
+                  "donor_id": "123e4567-e89b-12d3-a456-426614174001",
+                  "donor": {
+                    "id": "123e4567-e89b-12d3-a456-426614174001",
+                    "name": "Restaurante Bom Prato",
+                    "local": "Rua das Flores, 123"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Listar alimentos",
+        "tags": ["Alimentos"],
+        "responses": {
+          "200": {
+            "description": "Lista de alimentos",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": "123e4567-e89b-12d3-a456-426614174000",
+                    "name": "Arroz",
+                    "expiration_time": "2024-12-31T23:59:59Z",
+                    "quantity": 10,
+                    "donor": {
+                      "id": "123e4567-e89b-12d3-a456-426614174001",
+                      "name": "Restaurante Bom Prato",
+                      "local": "Rua das Flores, 123"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alimentos/proximos": {
+      "get": {
+        "summary": "Listar alimentos próximos",
+        "tags": ["Alimentos"],
+        "parameters": [
+          {
+            "name": "latitude",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": -23.5505
+          },
+          {
+            "name": "longitude",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": -46.6333
+          },
+          {
+            "name": "raio",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "default": 10
+            },
+            "example": 5
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de alimentos próximos",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": "123e4567-e89b-12d3-a456-426614174000",
+                    "name": "Arroz",
+                    "expiration_time": "2024-12-31T23:59:59Z",
+                    "quantity": 10,
+                    "donor": {
+                      "id": "123e4567-e89b-12d3-a456-426614174001",
+                      "name": "Restaurante Bom Prato",
+                      "local": "Rua das Flores, 123",
+                      "latitude": -23.5505,
+                      "longitude": -46.6333
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alimentos/{id}": {
+      "get": {
+        "summary": "Buscar alimento por ID",
+        "tags": ["Alimentos"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalhes do alimento",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": "123e4567-e89b-12d3-a456-426614174000",
+                  "name": "Arroz",
+                  "expiration_time": "2024-12-31T23:59:59Z",
+                  "quantity": 10,
+                  "donor": {
+                    "id": "123e4567-e89b-12d3-a456-426614174001",
+                    "name": "Restaurante Bom Prato",
+                    "local": "Rua das Flores, 123"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Alimento não encontrado"
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualizar alimento",
+        "tags": ["Alimentos"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nome do alimento"
+                  },
+                  "expiration_time": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Data de validade"
+                  },
+                  "quantity": {
+                    "type": "number",
+                    "description": "Quantidade disponível"
+                  }
+                }
+              },
+              "example": {
+                "name": "Arroz",
+                "expiration_time": "2024-12-31T23:59:59Z",
+                "quantity": 15
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Alimento atualizado com sucesso"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Excluir alimento",
+        "tags": ["Alimentos"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Alimento excluído com sucesso"
+          }
+        }
+      }
+    },
+    "/alimentos/disponiveis": {
+      "get": {
+        "summary": "Listar alimentos disponíveis",
+        "tags": ["Alimentos"],
+        "responses": {
+          "200": {
+            "description": "Lista de alimentos disponíveis",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": "123e4567-e89b-12d3-a456-426614174000",
+                    "name": "Arroz",
+                    "expiration_time": "2024-12-31T23:59:59Z",
+                    "quantity": 10,
+                    "donor": {
+                      "name": "Restaurante Bom Prato",
+                      "local": "Rua das Flores, 123"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vulneraveis": {
+      "post": {
+        "summary": "Criar novo vulnerável",
+        "tags": ["Vulneráveis"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "cpf": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "email": "joao@email.com",
+                "password": "123456",
+                "cpf": "123.456.789-00"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Vulnerável criado com sucesso",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": "123e4567-e89b-12d3-a456-426614174002",
+                  "email": "joao@email.com",
+                  "cpf": "123.456.789-00"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vulneraveis/perfil": {
+      "get": {
+        "summary": "Buscar perfil do vulnerável",
+        "tags": ["Vulneráveis"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Perfil do vulnerável",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": "123e4567-e89b-12d3-a456-426614174002",
+                  "email": "joao@email.com",
+                  "cpf": "123.456.789-00"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualizar perfil do vulnerável",
+        "tags": ["Vulneráveis"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "cpf": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "email": "joao.silva@email.com",
+                "cpf": "123.456.789-00"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Perfil atualizado com sucesso"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Excluir perfil do vulnerável",
+        "tags": ["Vulneráveis"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "204": {
+            "description": "Perfil excluído com sucesso"
+          }
+        }
+      }
+    },
+    "/doadores/{id}/alimentos": {
+      "get": {
+        "summary": "Listar alimentos de um doador",
+        "tags": ["Doadores"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de alimentos do doador",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": "123e4567-e89b-12d3-a456-426614174000",
+                    "name": "Arroz",
+                    "expiration_time": "2024-12-31T23:59:59Z",
+                    "quantity": 10
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Donor": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "cnpj": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "responsible": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "float"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "float"
+          },
+          "local": {
+            "type": "string"
+          }
+        }
+      },
+      "Food": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "expiration_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "donor_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "Vulnerable": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "cpf": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+} 
